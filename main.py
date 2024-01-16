@@ -8,7 +8,8 @@ from aiogram.utils import executor
 from time import sleep
 
 
-URL = "https://glavkniga.ru/"
+URL_GK = "https://glavkniga.ru/"
+URL_NN = "https://nalog-nalog.ru/"
 headers = {
     "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 YaBrowser/23.5.3.904 Yowser/2.5 Safari/537.36"
 }
@@ -25,16 +26,26 @@ async def main():
     last_post_id = 0
     while True:
         sleep(5)
-        response = requests.get(URL, headers=headers)
+        response = requests.get(URL_GK, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
+
         article = soup.find("table", class_="news_block news_block_margin news_block_has_image")
-        title = article.find("a", class_="news_block_hdg")
+        title = article.find("a", class_="news_block_hdg").text
         url = title.get("href")
         post_id = article.get("data-news_id")
+
         if post_id != last_post_id:
-            text = f"{title.text}\n https://glavkniga.ru{url}"
+            text = f"{title}\n https://glavkniga.ru{url}"
             await bot.send_message(user_id, text)
             last_post_id = post_id
+
+        sleep(5)
+        response = requests.get(URL_NN, headers=headers)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        title = article.find("a", class_="news-list_item_title").text
+        url = title.get("href")
+
 
 asyncio.run(main())
 
