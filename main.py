@@ -17,34 +17,46 @@ headers = {
 bot = Bot(token=os.getenv("TOKEN"))
 dp = Dispatcher(bot)
 
-user_id = "1469269332"
+channel_id = "-1002029021519"
 
 print(os.getenv("TOKEN"))
 
 
 async def main():
-    last_post_id = 0
     while True:
         sleep(5)
         response = requests.get(URL_GK, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
 
-        article = soup.find("table", class_="news_block news_block_margin news_block_has_image")
-        title = article.find("a", class_="news_block_hdg").text
-        url = title.get("href")
-        post_id = article.get("data-news_id")
+        article_gk = soup.find("table", class_="news_block news_block_margin news_block_has_image")
+        title_gk = article_gk.find("a", class_="news_block_hdg")
+        url_gk = title_gk.get("href")
+        post_id_gk = article_gk.get("data-news_id")
+        with open("last_post_id_gk.txt") as file:
+            last_post_id_gk = file.read()
 
-        if post_id != last_post_id:
-            text = f"{title}\n https://glavkniga.ru{url}"
-            await bot.send_message(user_id, text)
-            last_post_id = post_id
+        if post_id_gk != last_post_id_gk:
+            text = f"{title_gk.text}\n https://glavkniga.ru{url_gk}"
+            await bot.send_message(channel_id, text)
+            with open("last_post_id_gk.txt", "w") as file:
+                file.write(post_id_gk.text)
 
         sleep(5)
         response = requests.get(URL_NN, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
 
-        title = article.find("a", class_="news-list_item_title").text
-        url = title.get("href")
+        title_nn = soup.find("a", class_="news-list_item_title")
+        url_nn = title_nn.get("href")
+        with open("last_post_title_nn.txt") as file:
+            last_post_title_nn = file.read()
+            print(title_nn)
+            print(last_post_title_nn)
+
+        if title_nn.text != last_post_title_nn:
+            text = f"{title_nn.text}\n {url_nn}"
+            await bot.send_message(channel_id, text)
+            with open("last_post_title_nn.txt", "w") as file:
+                file.write(title_nn.text)
 
 
 asyncio.run(main())
