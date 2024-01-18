@@ -36,12 +36,11 @@ async def main():
             last_post_id_gk = file.read()
 
         if post_id_gk != last_post_id_gk:
-            text = f"{title_gk.text}\n https://glavkniga.ru{url_gk}"
+            text = f"{title_gk.text}\nhttps://glavkniga.ru{url_gk}"
             await bot.send_message(channel_id, text)
             with open("last_post_id_gk.txt", "w") as file:
-                file.write(post_id_gk.text)
+                file.write(post_id_gk)
 
-        sleep(5)
         response = requests.get(URL_NN, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
 
@@ -49,11 +48,12 @@ async def main():
         url_nn = title_nn.get("href")
         with open("last_post_title_nn.txt") as file:
             last_post_title_nn = file.read()
-            print(title_nn)
-            print(last_post_title_nn)
+            # print(title_nn.text)
+            # print(last_post_title_nn)
+            # print(title_nn.text == last_post_title_nn)
 
         if title_nn.text != last_post_title_nn:
-            text = f"{title_nn.text}\n {url_nn}"
+            text = f"{title_nn.text}\n{url_nn}"
             await bot.send_message(channel_id, text)
             with open("last_post_title_nn.txt", "w") as file:
                 file.write(title_nn.text)
