@@ -1,1 +1,7 @@
-bot_run.bat
+.idea
+.vscode
+.venv
+venv/
+.env
+test.py
+*.post.txt
