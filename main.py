@@ -7,7 +7,7 @@ from time import sleep
 from dotenv import load_dotenv
 
 
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
@@ -15,7 +15,7 @@ if os.path.exists(dotenv_path):
 URL_GK = "https://glavkniga.ru/"
 URL_NN = "https://nalog-nalog.ru/"
 headers = {
-    "User-Agent": os.environ["USER_AGENT"]
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 YaBrowser/23.5.3.904 Yowser/2.5 Safari/537.36"
 }
 
 bot = Bot(token=os.environ["TOKEN"])
@@ -23,16 +23,15 @@ dp = Dispatcher()
 
 channel_id = os.environ["CHANNEL_ID"]
 
+
 async def main():
     while True:
         sleep(5)
         response = requests.get(URL_GK, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
 
-        article_gk = soup.find(
-            "div", class_="news_block"
-        )
-        
+        article_gk = soup.find("div", class_="news_block")
+
         title_gk = article_gk.find("a", class_="news_block_hdg_f")
 
         title_gk_text = title_gk.text
