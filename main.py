@@ -50,24 +50,25 @@ async def main():
             with open("gk_last.post.txt", "w") as file:
                 file.write(post_id_gk)
 
-        # response = requests.get(URL_NN, headers=headers)
-        # soup = BeautifulSoup(response.text, "html.parser")
+        response = requests.get(URL_NN, headers=headers)
+        soup = BeautifulSoup(response.text, "html.parser")
 
-        # title_nn = soup.find("a", class_="news-list_item_title")
-        # url_nn = title_nn.get("href")
-        # with open("last_post_title_nn.txt") as file:
-        #     last_post_title_nn = file.read()
-        #     # print(title_nn.text)
-        #     # print(last_post_title_nn)
-        #     # print(title_nn.text == last_post_title_nn)
+        title_nn = soup.find("a", class_="news-list_item_title")
+        post_url_nn = title_nn.get("href")
 
-        # if title_nn.text != last_post_title_nn:
-        #     text = f"{title_nn.text}\n{url_nn}"
-        #     await bot.send_message(channel_id, text)
-        #     with open("last_post_title_nn.txt", "w") as file:
-        #         file.write(title_nn.text)
+        try:
+            with open("nn_last.post.txt", encoding='utf-8') as file:
+                last_post_title_nn = file.read()
+        except:
+            last_post_title_nn = None
 
+        if title_nn.text != last_post_title_nn:
+            text = f"{title_nn.text}\n{post_url_nn}"
+            await bot.send_message(channel_id, text)
+            with open("nn_last.post.txt", "w", encoding='utf-8') as file:
+                file.write(title_nn.text)
 
+ 
 asyncio.run(main())
 
 dp.start_polling(dp, skip_updates=True)
