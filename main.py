@@ -26,6 +26,9 @@ async def main():
         await parser.parse_gk()
         await parser.parse_nn()
         await parser.parse_article_nn()
+        await parser.parse_klerk()
+        await parser.parse_article_klerk()
+        
         sleep(5)
 
 

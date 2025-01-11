@@ -13,6 +13,7 @@ class Parser:
         }
         self.URL_GK = "https://glavkniga.ru"
         self.URL_NN = "https://nalog-nalog.ru"
+        self.URL_KLERK = "https://www.klerk.ru"
 
     async def parse_gk(self):
         response = requests.get(self.URL_GK, headers=self.headers)
@@ -26,6 +27,15 @@ class Parser:
         post_url_gk = title_gk.get("href")
         post_id_gk = post_url_gk.split("/")[-1]
 
+        response = requests.get(
+            f"{self.URL_GK}/news/{post_id_gk}", headers=self.headers
+        )
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        image_gk_src = (
+            soup.find("div", id="news_content").find("picture").find("img").get("src")
+        )
+
         try:
             with open("gk_last.post.txt") as file:
                 last_post_id_gk = file.read()
@@ -33,8 +43,18 @@ class Parser:
             last_post_id_gk = None
 
         if post_id_gk != last_post_id_gk:
-            text = f"{title_gk_text}\n\n{self.URL_GK}{post_url_gk}"
-            await self.bot.send_message(self.channel_id, text)
+            text = f"<b>{title_gk_text}</b>\n\n{self.URL_GK}{post_url_gk}"
+            if image_gk_src:
+                await self.bot.send_photo(
+                    self.channel_id,
+                    image_gk_src,
+                    caption=text,
+                    parse_mode=ParseMode.HTML,
+                )
+            else:
+                await self.bot.send_message(
+                    self.channel_id, text, parse_mode=ParseMode.HTML
+                )
             with open("gk_last.post.txt", "w") as file:
                 file.write(post_id_gk)
 
@@ -63,7 +83,9 @@ class Parser:
 
         article_nn = soup.find("div", class_="article-list_item_content")
         title_nn = article_nn.find("a", class_="article-list_item_title")
-        article_text_nn = article_nn.find("div", class_="article-list_item_text").text.strip()
+        article_text_nn = article_nn.find(
+            "div", class_="article-list_item_text"
+        ).text.strip()
         post_url_nn = title_nn.get("href")
 
         try:
@@ -74,6 +96,53 @@ class Parser:
 
         if title_nn.text != last_article_title_nn:
             text = f"<b>{title_nn.text}</b>\n\n{article_text_nn}\n\n{post_url_nn}"
-            await self.bot.send_message(self.channel_id, text, parse_mode=ParseMode.HTML)
+            await self.bot.send_message(
+                self.channel_id, text, parse_mode=ParseMode.HTML
+            )
             with open("nn_last.article.txt", "w", encoding="utf-8") as file:
                 file.write(title_nn.text)
+
+    async def parse_klerk(self):
+        response = requests.get(self.URL_KLERK, headers=self.headers)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        title_klerk = soup.find("section").find("li").find("a")
+        post_url_klerk = title_klerk.get("href")
+        post_id_klerk = post_url_klerk.split("/")[-2]
+
+        try:
+            with open("klerk_last.post.txt", encoding="utf-8") as file:
+                last_post_id_klerk = file.read()
+        except:
+            last_post_id_klerk = None
+
+        if post_id_klerk != last_post_id_klerk:
+            text = f"<b>{title_klerk.text}</b>\n\n{self.URL_KLERK}{post_url_klerk}"
+            await self.bot.send_message(
+                self.channel_id, text, parse_mode=ParseMode.HTML
+            )
+            with open("klerk_last.post.txt", "w", encoding="utf-8") as file:
+                file.write(post_id_klerk)
+
+    async def parse_article_klerk(self):
+        response = requests.get(self.URL_KLERK, headers=self.headers)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        article_klerk = soup.find("section", id="top-feed").find_all("a")[1]
+        article_url_klerk = article_klerk.get("href")
+        article_title_klerk = article_klerk.find("h3").text.strip()
+        article_text_klerk = article_klerk.find("p").text.strip()
+
+        try:
+            with open("klerk_last.article.txt", encoding="utf-8") as file:
+                article_title_last_klerk = file.read()
+        except:
+            article_title_last_klerk = None
+
+        if article_title_klerk != article_title_last_klerk:
+            text = f"<b>{article_title_klerk}</b>\n\n{article_text_klerk}\n\n{self.URL_KLERK}{article_url_klerk}"
+            await self.bot.send_message(
+                self.channel_id, text, parse_mode=ParseMode.HTML
+            )
+            with open("klerk_last.article.txt", "w", encoding="utf-8") as file:
+                file.write(article_title_klerk) 
