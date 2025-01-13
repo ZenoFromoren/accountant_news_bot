@@ -128,7 +128,7 @@ class Parser:
         response = requests.get(self.URL_KLERK, headers=self.headers)
         soup = BeautifulSoup(response.text, "html.parser")
 
-        article_klerk = soup.find("section", id="top-feed").find_all("a")[1]
+        article_klerk = soup.find("section", id="top-feed").find("a", class_="group")
         article_url_klerk = article_klerk.get("href")
         article_title_klerk = article_klerk.find("h3").text.strip()
         article_text_klerk = article_klerk.find("p").text.strip()
