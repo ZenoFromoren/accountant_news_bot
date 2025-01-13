@@ -2,6 +2,7 @@ import requests
 import asyncio
 from bs4 import BeautifulSoup
 from aiogram.enums.parse_mode import ParseMode
+import time
 
 
 class Parser:
@@ -14,6 +15,7 @@ class Parser:
         self.URL_GK = "https://glavkniga.ru"
         self.URL_NN = "https://nalog-nalog.ru"
         self.URL_KLERK = "https://www.klerk.ru"
+        self.URL_BUHGALTERIA = "https://www.buhgalteria.ru"
 
     async def parse_gk(self):
         response = requests.get(self.URL_GK, headers=self.headers)
@@ -72,8 +74,10 @@ class Parser:
             last_post_title_nn = None
 
         if title_nn.text != last_post_title_nn:
-            text = f"{title_nn.text}\n\n{post_url_nn}"
-            await self.bot.send_message(self.channel_id, text)
+            text = f"<b>{title_nn.text}</b>\n\n{post_url_nn}"
+            await self.bot.send_message(
+                self.channel_id, text, parse_mode=ParseMode.HTML
+            )
             with open("nn_last.post.txt", "w", encoding="utf-8") as file:
                 file.write(title_nn.text)
 
@@ -145,4 +149,66 @@ class Parser:
                 self.channel_id, text, parse_mode=ParseMode.HTML
             )
             with open("klerk_last.article.txt", "w", encoding="utf-8") as file:
-                file.write(article_title_klerk) 
+                file.write(article_title_klerk)
+
+    async def parse_buhgalteria(self):
+        response = requests.get(self.URL_BUHGALTERIA, headers=self.headers)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        post_buhgalteria = soup.find_all("div", class_="hidden-xs")[3].find("article")
+
+        post_title_buhgalteria = post_buhgalteria.find("h3").find("a")
+        post_title_text_buhgalteria = post_title_buhgalteria.text
+        post_url_buhgalteria = post_title_buhgalteria.get("href")
+        post_buhgalteria_id = post_buhgalteria.parent.get("id")
+
+        try:
+            with open("buhgalteria_last.post.txt", encoding="utf-8") as file:
+                post_last_id_buhgalteria = file.read()
+        except:
+            post_last_id_buhgalteria = None
+
+        if post_buhgalteria_id != post_last_id_buhgalteria:
+            text = f"<b>{post_title_text_buhgalteria}</b>\n\n{self.URL_BUHGALTERIA}{post_url_buhgalteria}"
+            await self.bot.send_message(
+                self.channel_id, text, parse_mode=ParseMode.HTML
+            )
+            with open("buhgalteria_last.post.txt", "w", encoding="utf-8") as file:
+                file.write(post_buhgalteria_id)
+
+    async def parse_buhgalteria_article(self):
+        response = requests.get(self.URL_BUHGALTERIA, headers=self.headers)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        article_buhgalteria = soup.find("article")
+
+        article_title_buhgalteria = article_buhgalteria.find("h3").find("a")
+        article_title_text_buhgalteria = article_title_buhgalteria.text.strip()
+        article_text_buhgalteria = article_buhgalteria.find(
+            "span", class_="text"
+        ).text.strip()
+        article_url_buhgalteria = article_title_buhgalteria.get("href")
+        article_buhgalteria_id = article_buhgalteria.find("div").get("id")
+        article_buhgalteria_image = article_buhgalteria.find("img").get("src")
+
+        try:
+            with open("buhgalteria_last.article.txt", encoding="utf-8") as file:
+                article_last_id_buhgalteria = file.read()
+        except:
+            article_last_id_buhgalteria = None
+
+        if article_buhgalteria_id != article_last_id_buhgalteria:
+            text = f"<b>{article_title_text_buhgalteria}</b>\n\n{article_text_buhgalteria}\n\n{self.URL_BUHGALTERIA}{article_url_buhgalteria}"
+            if article_buhgalteria_image:
+                await self.bot.send_photo(
+                    self.channel_id,
+                    f"{self.URL_BUHGALTERIA}{article_buhgalteria_image}",
+                    caption=text,
+                    parse_mode=ParseMode.HTML,
+                )
+            else:
+                await self.bot.send_message(
+                    self.channel_id, text, parse_mode=ParseMode.HTML
+                )
+            with open("buhgalteria_last.article.txt", "w", encoding="utf-8") as file:
+                file.write(article_buhgalteria_id)

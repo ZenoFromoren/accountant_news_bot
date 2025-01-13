@@ -28,7 +28,9 @@ async def main():
         await parser.parse_article_nn()
         await parser.parse_klerk()
         await parser.parse_article_klerk()
-        
+        await parser.parse_buhgalteria()
+        await parser.parse_buhgalteria_article()
+
         sleep(5)
 
 
