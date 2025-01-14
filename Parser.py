@@ -132,27 +132,30 @@ class Parser:
             print("parse klerk failed")
 
     async def parse_article_klerk(self):
-        response = requests.get(self.URL_KLERK, headers=self.headers)
-        soup = BeautifulSoup(response.text, "html.parser")
-
-        article_klerk = soup.find("section", id="top-feed").find("a", class_="group")
-        article_url_klerk = article_klerk.get("href")
-        article_title_klerk = article_klerk.find("h3").text.strip()
-        article_text_klerk = article_klerk.find("p").text.strip()
-
         try:
-            with open("klerk_last.article.txt", encoding="utf-8") as file:
-                article_title_last_klerk = file.read()
-        except:
-            article_title_last_klerk = None
+            response = requests.get(self.URL_KLERK, headers=self.headers)
+            soup = BeautifulSoup(response.text, "html.parser")
 
-        if article_title_klerk != article_title_last_klerk:
-            text = f"<b>{article_title_klerk}</b>\n\n{article_text_klerk}\n\n{self.URL_KLERK}{article_url_klerk}"
-            await self.bot.send_message(
-                self.channel_id, text, parse_mode=ParseMode.HTML
-            )
-            with open("klerk_last.article.txt", "w", encoding="utf-8") as file:
-                file.write(article_title_klerk)
+            article_klerk = soup.find("section", id="top-feed").find("a", class_="group")
+            article_url_klerk = article_klerk.get("href")
+            article_title_klerk = article_klerk.find("h3").text.strip()
+            article_text_klerk = article_klerk.find("p").text.strip()
+
+            try:
+                with open("klerk_last.article.txt", encoding="utf-8") as file:
+                    article_title_last_klerk = file.read()
+            except:
+                article_title_last_klerk = None
+
+            if article_title_klerk != article_title_last_klerk:
+                text = f"<b>{article_title_klerk}</b>\n\n{article_text_klerk}\n\n{self.URL_KLERK}{article_url_klerk}"
+                await self.bot.send_message(
+                    self.channel_id, text, parse_mode=ParseMode.HTML
+                )
+                with open("klerk_last.article.txt", "w", encoding="utf-8") as file:
+                    file.write(article_title_klerk)
+        except:
+            print("parse article klerk failed")
 
     async def parse_buhgalteria(self):
         response = requests.get(self.URL_BUHGALTERIA, headers=self.headers)
