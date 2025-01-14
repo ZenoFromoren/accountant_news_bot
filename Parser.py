@@ -107,26 +107,29 @@ class Parser:
                 file.write(title_nn.text)
 
     async def parse_klerk(self):
-        response = requests.get(self.URL_KLERK, headers=self.headers)
-        soup = BeautifulSoup(response.text, "html.parser")
-
-        title_klerk = soup.find("section").find("li").find("a")
-        post_url_klerk = title_klerk.get("href")
-        post_id_klerk = post_url_klerk.split("/")[-2]
-
         try:
-            with open("klerk_last.post.txt", encoding="utf-8") as file:
-                last_post_id_klerk = file.read()
-        except:
-            last_post_id_klerk = None
+            response = requests.get(self.URL_KLERK, headers=self.headers)
+            soup = BeautifulSoup(response.text, "html.parser")
 
-        if post_id_klerk != last_post_id_klerk:
-            text = f"<b>{title_klerk.text}</b>\n\n{self.URL_KLERK}{post_url_klerk}"
-            await self.bot.send_message(
-                self.channel_id, text, parse_mode=ParseMode.HTML
-            )
-            with open("klerk_last.post.txt", "w", encoding="utf-8") as file:
-                file.write(post_id_klerk)
+            title_klerk = soup.find("section").find("li").find("a")
+            post_url_klerk = title_klerk.get("href")
+            post_id_klerk = post_url_klerk.split("/")[-2]
+
+            try:
+                with open("klerk_last.post.txt", encoding="utf-8") as file:
+                    last_post_id_klerk = file.read()
+            except:
+                last_post_id_klerk = None
+
+            if post_id_klerk != last_post_id_klerk:
+                text = f"<b>{title_klerk.text}</b>\n\n{self.URL_KLERK}{post_url_klerk}"
+                await self.bot.send_message(
+                    self.channel_id, text, parse_mode=ParseMode.HTML
+                )
+                with open("klerk_last.post.txt", "w", encoding="utf-8") as file:
+                    file.write(post_id_klerk)
+        except:
+            print("parse klerk failed")
 
     async def parse_article_klerk(self):
         response = requests.get(self.URL_KLERK, headers=self.headers)
