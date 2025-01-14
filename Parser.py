@@ -2,7 +2,6 @@ import requests
 import asyncio
 from bs4 import BeautifulSoup
 from aiogram.enums.parse_mode import ParseMode
-from time import sleep
 
 
 class Parser:
@@ -107,7 +106,6 @@ class Parser:
                 file.write(title_nn.text)
 
     async def parse_klerk(self):
-        sleep(1)
         try:
             response = requests.get(self.URL_KLERK, headers=self.headers)
             soup = BeautifulSoup(response.text, "html.parser")
@@ -133,7 +131,6 @@ class Parser:
             print("parse klerk failed")
 
     async def parse_article_klerk(self):
-        sleep(1)
         try:
             response = requests.get(self.URL_KLERK, headers=self.headers)
             soup = BeautifulSoup(response.text, "html.parser")
