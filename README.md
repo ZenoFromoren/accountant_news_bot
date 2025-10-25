@@ -1,5 +1,5 @@
 # Telegram-бот Accountant news (Бухгалтерские новости)
-Телеграм-канал: t.me/accountant_news_zeno
+Телеграм-канал: [t.me/accountant_news_zeno](https://t.me/accountant_news_zeno)
 
 ## Описание
 Telegram-бот написан на python с помощью библиотеки aiogram и занимается парсингом новостей и статей в режиме реального времени с самых популярных русскоязычных сайтов про бухгалтерию:
