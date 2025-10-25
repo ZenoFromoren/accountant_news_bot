@@ -15,6 +15,7 @@ class Parser:
         self.URL_KLERK = "https://www.klerk.ru"
         self.URL_BUHGALTERIA = "https://www.buhgalteria.ru"
         self.URL_KDELO = "https://www.kdelo.ru"
+        self.URL_GARANT = "https://www.garant.ru"
 
     async def parse_gk(self):
         response = requests.get(self.URL_GK, headers=self.headers)
@@ -24,7 +25,7 @@ class Parser:
 
         title_gk = article_gk.find("a", class_="news_block_hdg_f")
 
-        title_gk_text = title_gk.text
+        title_gk_text = title_gk.text.strip()
         post_url_gk = title_gk.get("href")
         post_id_gk = post_url_gk.split("/")[-1]
 
@@ -319,3 +320,44 @@ class Parser:
         except Exception as e:
             print(e)
             print("failed parse kdelo question")
+
+    async def parse_garant(self):
+        response = requests.get(f"{self.URL_GARANT}/ia/aggregator/nalogi-i-buhuchet/", headers=self.headers)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        garant_article = soup.select_one("article:not(.announce)")
+
+        garant_title = garant_article.find("a", class_="title")
+        garant_title_text = garant_title.text.strip()
+        garant_url = garant_title.get("href")
+        garant_text = garant_article.find("p").text.strip()
+        garant_id = garant_url.split("/")[2]
+
+        response = requests.get(f"{self.URL_GARANT}{garant_url}", headers=self.headers)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        garant_image = soup.find("div", class_="page-content").find("img").get("src")
+
+        try:
+            with open("garant_last.post.txt", encoding="utf-8") as file:
+                garant_last_id = file.read()
+        except:
+            garant_last_id = None
+
+        if garant_id != garant_last_id:
+            text = f"<b>{garant_title_text}</b>\n\n{garant_text}\n\n{self.URL_GARANT}{garant_url}"
+            if garant_image:
+                await self.bot.send_photo(
+                    self.channel_id,
+                    f"{self.URL_GARANT}{garant_image}",
+                    caption=text,
+                    parse_mode=ParseMode.HTML,
+                )
+            else:
+                await self.bot.send_message(
+                    self.channel_id, text, parse_mode=ParseMode.HTML
+                )
+            with open(
+                "garant_last.post.txt", "w", encoding="utf-8"
+            ) as file:
+                file.write(garant_id)

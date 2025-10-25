@@ -31,6 +31,7 @@ async def main():
         await parser.parse_kdelo_article()
         await parser.parse_kdelo_new()
         await parser.parse_kdelo_question()
+        await parser.parse_garant()
 
         sleep(5)
 
