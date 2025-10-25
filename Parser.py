@@ -1,5 +1,4 @@
 import requests
-import asyncio
 from bs4 import BeautifulSoup
 from aiogram.enums.parse_mode import ParseMode
 
@@ -15,6 +14,7 @@ class Parser:
         self.URL_NN = "https://nalog-nalog.ru"
         self.URL_KLERK = "https://www.klerk.ru"
         self.URL_BUHGALTERIA = "https://www.buhgalteria.ru"
+        self.URL_KDELO = "https://www.kdelo.ru"
 
     async def parse_gk(self):
         response = requests.get(self.URL_GK, headers=self.headers)
@@ -135,7 +135,9 @@ class Parser:
             response = requests.get(self.URL_KLERK, headers=self.headers)
             soup = BeautifulSoup(response.text, "html.parser")
 
-            article_klerk = soup.find("section", id="top-feed").find("a", class_="group")
+            article_klerk = soup.find("section", id="top-feed").find(
+                "a", class_="group"
+            )
             article_url_klerk = article_klerk.get("href")
             article_title_klerk = article_klerk.find("h3").text.strip()
             article_text_klerk = article_klerk.find("p").text.strip()
@@ -161,7 +163,9 @@ class Parser:
             response = requests.get(self.URL_BUHGALTERIA, headers=self.headers)
             soup = BeautifulSoup(response.text, "html.parser")
 
-            post_buhgalteria = soup.find_all("div", class_="hidden-xs")[3].find("article")
+            post_buhgalteria = soup.find_all("div", class_="hidden-xs")[3].find(
+                "article"
+            )
 
             post_title_buhgalteria = post_buhgalteria.find("h3").find("a")
             post_title_text_buhgalteria = post_title_buhgalteria.text
@@ -219,7 +223,99 @@ class Parser:
                     await self.bot.send_message(
                         self.channel_id, text, parse_mode=ParseMode.HTML
                     )
-                with open("buhgalteria_last.article.txt", "w", encoding="utf-8") as file:
+                with open(
+                    "buhgalteria_last.article.txt", "w", encoding="utf-8"
+                ) as file:
                     file.write(article_buhgalteria_id)
         except:
             print("parse buhgalteria article failed")
+
+    async def parse_kdelo_article(self):
+        try:
+            response = requests.get(self.URL_KDELO, headers=self.headers)
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            kdelo_article = soup.find("div", class_="defaultBlock__item")
+
+            kdelo_article_title = kdelo_article.find(
+                "a", class_="defaultBlock__itemTitleLink"
+            )
+            kdelo_article_title_text = kdelo_article_title.text
+            kdelo_article_title_url = kdelo_article_title.get("href")
+            kdelo_article_text = kdelo_article.find(
+                "span", class_="defaultBlock__itemDescriptionInside"
+            ).text.strip()
+
+            try:
+                with open("kdelo_last.article.txt", encoding="utf-8") as file:
+                    article_title_last_kdelo = file.read()
+            except:
+                article_title_last_kdelo = None
+
+            if kdelo_article_title_text != article_title_last_kdelo:
+                text = f"<b>{kdelo_article_title_text}</b>\n\n{kdelo_article_text}\n\n{self.URL_KDELO}{kdelo_article_title_url}"
+
+                await self.bot.send_message(
+                    self.channel_id, text, parse_mode=ParseMode.HTML
+                )
+                with open("kdelo_last.article.txt", "w", encoding="utf-8") as file:
+                    file.write(kdelo_article_title_text)
+
+        except:
+            print("failed parse kdelo article")
+
+    async def parse_kdelo_new(self):
+        try:
+            response = requests.get(f"{self.URL_KDELO}/news", headers=self.headers)
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            kdelo_article_title = soup.find("a", class_="defaultBlock__itemTitleLink")
+            kdelo_article_title_text = kdelo_article_title.text.strip()
+            kdelo_article_title_url = kdelo_article_title.get("href")
+
+            try:
+                with open("kdelo_last.new.txt", encoding="utf-8") as file:
+                    article_title_last_kdelo = file.read()
+            except:
+                article_title_last_kdelo = None
+
+            if kdelo_article_title_text != article_title_last_kdelo:
+                text = f"<b>{kdelo_article_title_text}</b>\n\n{self.URL_KDELO}{kdelo_article_title_url}"
+
+                await self.bot.send_message(
+                    self.channel_id, text, parse_mode=ParseMode.HTML
+                )
+
+                with open("kdelo_last.new.txt", "w", encoding="utf-8") as file:
+                    file.write(kdelo_article_title_text)
+
+        except:
+            print("failed parse kdelo new")
+
+    async def parse_kdelo_question(self):
+        try:
+            response = requests.get(f"{self.URL_KDELO}/question", headers=self.headers)
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            kdelo_question_title = soup.find("a", class_="defaultBlock__itemTitleLink")
+            kdelo_question_title_text = kdelo_question_title.text.strip()
+            kdelo_question_title_url = kdelo_question_title.get("href")
+
+            try:
+                with open("kdelo_last.question.txt", encoding="utf-8") as file:
+                    question_title_last_kdelo = file.read()
+            except:
+                question_title_last_kdelo = None
+
+            if kdelo_question_title_text != question_title_last_kdelo:
+                text = f"<b>{kdelo_question_title_text}</b>\n\n{self.URL_KDELO}{kdelo_question_title_url}"
+
+                await self.bot.send_message(
+                    self.channel_id, text, parse_mode=ParseMode.HTML
+                )
+
+                with open("kdelo_last.question.txt", "w", encoding="utf-8") as file:
+                    file.write(kdelo_question_title_text)
+        except Exception as e:
+            print(e)
+            print("failed parse kdelo question")

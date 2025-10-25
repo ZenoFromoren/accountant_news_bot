@@ -1,7 +1,5 @@
 import os
-import requests
 import asyncio
-from bs4 import BeautifulSoup
 from aiogram import Bot, Dispatcher
 from time import sleep
 from dotenv import load_dotenv
@@ -30,6 +28,9 @@ async def main():
         await parser.parse_article_klerk()
         await parser.parse_buhgalteria()
         await parser.parse_buhgalteria_article()
+        await parser.parse_kdelo_article()
+        await parser.parse_kdelo_new()
+        await parser.parse_kdelo_question()
 
         sleep(5)
 
