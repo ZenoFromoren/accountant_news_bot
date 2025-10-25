@@ -7,4 +7,5 @@ venv/
 test.py
 *.post.txt
 *.article.txt
+*.new.txt
 *.question.txt
